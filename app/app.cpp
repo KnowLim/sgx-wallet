@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <ctype.h>
 
-//#include "app.h" // remove
 #include "utils.h"
 #include "../include/debug.h"
 #include "../wallet/wallet.h"
@@ -33,6 +32,11 @@ int main(int argc, char** argv) {
             // help
             case 'h':
                 h_flag = 1;
+                break;
+
+            // version
+            case 'v':
+                v_flag = 1;
                 break;
 
             // run tests
@@ -110,6 +114,11 @@ int main(int argc, char** argv) {
         // show help
         if (h_flag) {
             show_help();
+        }
+
+        // show version
+        else if (v_flag) {
+            show_version();
         }
 
         // run tests

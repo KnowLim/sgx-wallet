@@ -26,6 +26,7 @@
  * Defines
  ***************************************************/
 #define APP_NAME "wallet"
+#define VERSION "0.0.1"
 
 
 /***************************************************
@@ -91,6 +92,15 @@ int is_error(int error_code);
  * @return     -
  */
 void show_help();
+
+/**
+ * @brief      Prints the build version. 
+ *
+ * @param      -
+ *
+ * @return     -
+ */
+void show_version();
 
 
 #endif // UTIL_H_

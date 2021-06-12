@@ -1,25 +1,7 @@
-/*
- * Copyright 2018 Alberto Sonnino
- * 
- * This file is part of SGX-WALLET.
- * 
- * SGX-WALLET is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * SGX-WALLET is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with SGX-WALLET.  If not, see <http://www.gnu.org/licenses/>.
- */
 #include <stdio.h>
 #include <cstring>
 
-#include "utils.h" // Remove?
+#include "utils.h"
 #include "../wallet/wallet.h"
 
 
@@ -56,7 +38,7 @@ void error_print(const char* str) {
  */
 void print_wallet(const wallet_t* wallet) {
     printf("\n-----------------------------------------\n\n");
-    printf("%s\n", APP_NAME);
+    printf("%s v%s\n", APP_NAME, VERSION);
     printf("Simple password wallet.\n\n");
     printf("Number of items: %lu\n\n", wallet->size);
     for (int i = 0; i < wallet->size; ++i) {
@@ -129,7 +111,7 @@ int is_error(int error_code) {
  *
  */
 void show_help() {
-	const char* command = "[-h Show this screen] [-t Run tests] " \
+	const char* command = "[-h Show this screen] [-v Show version] [-t Run tests] " \
 		"[-n master-password] [-p master-password -c new-master-password]" \
 		"[-p master-password -a -x items_title -y items_username -z toitems_password]" \
 		"[-p master-password -r items_index]";
@@ -137,6 +119,13 @@ void show_help() {
 }
 
 
+/**
+ * @brief      Prints the build version. 
+ *
+ */
+void show_version() {
+	printf("v%s\n", VERSION);
+}
 
 
 

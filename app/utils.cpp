@@ -19,10 +19,8 @@
 #include <stdio.h>
 #include <cstring>
 
-#include "utils.h"
-#include "app.h"
-#include "wallet.h"
-#include "enclave.h"
+#include "utils.h" // Remove?
+#include "../wallet/wallet.h"
 
 
 /**
@@ -58,8 +56,8 @@ void error_print(const char* str) {
  */
 void print_wallet(const wallet_t* wallet) {
     printf("\n-----------------------------------------\n\n");
-    printf("%s v%s\n", APP_NAME, VERSION);
-    printf("Simple password wallet based on Intel SGX.\n\n");
+    printf("%s\n", APP_NAME);
+    printf("Simple password wallet.\n\n");
     printf("Number of items: %lu\n\n", wallet->size);
     for (int i = 0; i < wallet->size; ++i) {
         printf("#%d -- %s\n", i, wallet->items[i].title);
@@ -116,14 +114,6 @@ int is_error(int error_code) {
             sprintf(err_message, "Item too longth (maximum size: %d).", MAX_ITEM_SIZE); 
             break;
 
-        case ERR_FAIL_SEAL:
-            sprintf(err_message, "Fail to seal wallet."); 
-            break;
-
-        case ERR_FAIL_UNSEAL:
-            sprintf(err_message, "Fail to unseal wallet."); 
-            break;
-
         default:
             sprintf(err_message, "Unknown error."); 
     }
@@ -139,22 +129,14 @@ int is_error(int error_code) {
  *
  */
 void show_help() {
-	const char* command = "[-h Show this screen] [-v Show version] [-t Run tests] " \
+	const char* command = "[-h Show this screen] [-t Run tests] " \
 		"[-n master-password] [-p master-password -c new-master-password]" \
 		"[-p master-password -a -x items_title -y items_username -z toitems_password]" \
 		"[-p master-password -r items_index]";
 	printf("\nusage: %s %s\n\n", APP_NAME, command);
-    printf("more information: https://github.com/asonnino/sgx-wallet\n\n");
 }
 
 
-/**
- * @brief      Prints the build version. 
- *
- */
-void show_version() {
-	printf("v%s\n", VERSION);
-}
 
 
 

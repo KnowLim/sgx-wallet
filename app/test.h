@@ -19,8 +19,6 @@
 #ifndef TEST_H_
 #define TEST_H_
 
-#include "sgx_urts.h"
-
 
 /**
  * @brief      Runs the tests.
@@ -29,7 +27,7 @@
  *
  * @return     Truthy if successful, falsy otherwise.
  */
-int test(sgx_enclave_id_t eid);
+int test();
 
 
 #endif // TEST_H_

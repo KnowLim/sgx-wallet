@@ -16,23 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with SGX-WALLET.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "enclave_u.h"
-#include "sgx_urts.h"
-
 #include <cstring>
+#include <cstdlib>
 
 #include "test.h"
 #include "utils.h"
+#include "../wallet/wallet.h"
 
 
 /**
  * @brief      Runs the tests.
  *
  */
-int test(sgx_enclave_id_t eid) {
+int test() {
     // declare return variables
-	sgx_status_t ecall_status;
-	int ret;
+	int ret_status;
 
     // test inputs
 	const char master_password[MAX_ITEM_SIZE] = "This is the master-password";
@@ -49,8 +47,8 @@ int test(sgx_enclave_id_t eid) {
     // test create wallet
     ////////////////////////////////////////////////
     // happy path
-    ecall_status = ecall_create_wallet(eid, &ret, master_password);
-    if (ecall_status != SGX_SUCCESS || is_error(ret)) {
+    ret_status = create_wallet(master_password);
+    if (ret_status != RET_SUCCESS) {
         error_print("[TEST] Fail to create new wallet.");
         return 1;
     }
@@ -66,8 +64,8 @@ int test(sgx_enclave_id_t eid) {
     strcpy(new_item->username, username); 
     strcpy(new_item->password, password);
     for (int i = 0; i < 2; ++i) {
-        ecall_status = ecall_add_item(eid, &ret, master_password, new_item, sizeof(item_t));
-        if (ecall_status != SGX_SUCCESS || is_error(ret)) {
+        ret_status = add_item(master_password, new_item, sizeof(item_t));
+        if (ret_status != RET_SUCCESS) {
             error_print("[TEST] Fail to add new item to wallet.");
             return 1;
         }
@@ -80,8 +78,8 @@ int test(sgx_enclave_id_t eid) {
     // test change master password
     ////////////////////////////////////////////////
     // happy path
-    ecall_status = ecall_change_master_password(eid, &ret, master_password, new_master_password);
-    if (ecall_status != SGX_SUCCESS || is_error(ret)) {
+    ret_status = change_master_password(master_password, new_master_password);
+    if (ret_status != RET_SUCCESS) {
         error_print("[TEST] Fail change master-password.");
         return 1;
     }
@@ -94,8 +92,8 @@ int test(sgx_enclave_id_t eid) {
     ////////////////////////////////////////////////
     // happy path
     const int index = 1;
-    ecall_status = ecall_remove_item(eid, &ret, new_master_password, index);
-    if (ecall_status != SGX_SUCCESS || is_error(ret)) {
+    ret_status = remove_item(new_master_password, index);
+    if (ret_status != RET_SUCCESS) {
         error_print("[TEST] Fail to remove item.");
         return 1;
     }
@@ -107,8 +105,8 @@ int test(sgx_enclave_id_t eid) {
     ////////////////////////////////////////////////
     // happy path
     wallet_t* wallet = (wallet_t*)malloc(sizeof(wallet_t));
-    ecall_status = ecall_show_wallet(eid, &ret, new_master_password, wallet, sizeof(wallet_t));
-    if (ecall_status != SGX_SUCCESS || is_error(ret)) {
+    ret_status = show_wallet(new_master_password, wallet);
+    if (ret_status != RET_SUCCESS) {
         error_print("[TEST] Fail to retrieve wallet.");
         return 1;
     }

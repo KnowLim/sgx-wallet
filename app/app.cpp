@@ -1,111 +1,20 @@
-/*
- * Copyright 2018 Alberto Sonnino
- * 
- * This file is part of SGX-WALLET.
- * 
- * SGX-WALLET is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * SGX-WALLET is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with SGX-WALLET.  If not, see <http://www.gnu.org/licenses/>.
- */
-#include "enclave_u.h"
-#include "sgx_urts.h"
-
 #include <cstring>
-#include <fstream>
 #include <getopt.h>
+#include <cstdlib>
+#include <stdio.h>
+#include <ctype.h>
 
-#include "app.h"
+//#include "app.h" // remove
 #include "utils.h"
-#include "ocalls.h"
-#include "debug.h"
-#include "wallet.h"
-#include "enclave.h"
+#include "../include/debug.h"
+#include "../wallet/wallet.h"
 #include "test.h"
 
 using namespace std;
 
-
-/***************************************************
- * OCALLs implementation
- ***************************************************/
-/**
- * @brief      Prints a message to the console. 
- *
- */
-void ocall_debug_print(const char* str) {
-    printf("[DEBUG] %s\n", str);
-}
-
-/**
- * @brief      Save sealed data to file The sizes/length of 
- *             pointers need to be specified, otherwise SGX will
- *             assume a count of 1 for all pointers.
- *
- */
-int ocall_save_wallet(const uint8_t* sealed_data, const size_t sealed_size) {
-    ofstream file(WALLET_FILE, ios::out | ios::binary);
-    if (file.fail()) {return 1;}
-    file.write((const char*) sealed_data, sealed_size);
-    file.close();
-    return 0;
-}
-
-/**
- * @brief      Load sealed data from file The sizes/length of 
- *             pointers need to be specified, otherwise SGX will
- *             assume a count of 1 for all pointers.
- *
- */
-int ocall_load_wallet(uint8_t* sealed_data, const size_t sealed_size) {
-    ifstream file(WALLET_FILE, ios::in | ios::binary);
-    if (file.fail()) {return 1;}
-    file.read((char*) sealed_data, sealed_size);
-    file.close();
-    return 0;
-}
-
-/**
- * @brief      Verifies if a wallet files exists.
- *
- */
-int ocall_is_wallet(void) {
-    ifstream file(WALLET_FILE, ios::in | ios::binary);
-    if (file.fail()) {return 0;} // failure means no wallet found
-    file.close();
-    return 1;
-}
-
-
-
-/***************************************************
- * main
- ***************************************************/
 int main(int argc, char** argv) {
-    // declare enclave & return variables
-    sgx_enclave_id_t eid = 0;
-    sgx_launch_token_t token = {0};
-    int updated, ret;
-    sgx_status_t ecall_status, enclave_status;
-
-
-    ////////////////////////////////////////////////
-    // initialise enclave
-    ////////////////////////////////////////////////
-    enclave_status = sgx_create_enclave(ENCLAVE_FILE, SGX_DEBUG_FLAG, &token, &updated, &eid, NULL);
-    if(enclave_status != SGX_SUCCESS) {
-        error_print("Fail to initialize enclave."); 
-        return -1;
-    }
-    info_print("Enclave successfully initilised.");
+    // declare return variables
+    int updated, ret_status;
 
 
     ////////////////////////////////////////////////
@@ -124,11 +33,6 @@ int main(int argc, char** argv) {
             // help
             case 'h':
                 h_flag = 1;
-                break;
-
-            // version
-            case 'v':
-                v_flag = 1;
                 break;
 
             // run tests
@@ -208,22 +112,17 @@ int main(int argc, char** argv) {
             show_help();
         }
 
-        // show version
-        else if (v_flag) {
-            show_version();
-        }
-
         // run tests
         else if(t_flag) {
             info_print("Running tests...");
-            if (test(eid) != 0) {error_print("One or more tests failed.");}
+            if (test() != 0) {error_print("One or more tests failed.");}
             else {info_print("All tests successfully passed.");}
         }
 
         // create new wallet
         else if(n_value!=NULL) {
-            ecall_status = ecall_create_wallet(eid, &ret, n_value);
-            if (ecall_status != SGX_SUCCESS || is_error(ret)) {
+            ret_status = create_wallet(n_value);
+            if (ret_status != RET_SUCCESS) {
                 error_print("Fail to create new wallet.");
             }
             else {
@@ -233,8 +132,8 @@ int main(int argc, char** argv) {
 
         // change master-password
         else if (p_value!=NULL && c_value!=NULL) {
-            ecall_status = ecall_change_master_password(eid, &ret, p_value, c_value);
-            if (ecall_status != SGX_SUCCESS || is_error(ret)) {
+            ret_status = change_master_password(p_value, c_value);
+            if (ret_status != RET_SUCCESS) {
                 error_print("Fail change master-password.");
             }
             else {
@@ -245,8 +144,8 @@ int main(int argc, char** argv) {
         // show wallet
         else if(p_value!=NULL && s_flag) {
             wallet_t* wallet = (wallet_t*)malloc(sizeof(wallet_t));
-            ecall_status = ecall_show_wallet(eid, &ret, p_value, wallet, sizeof(wallet_t));
-            if (ecall_status != SGX_SUCCESS || is_error(ret)) {
+            ret_status = show_wallet(p_value, wallet);
+            if (ret_status != RET_SUCCESS) {
                 error_print("Fail to retrieve wallet.");
             }
             else {
@@ -262,8 +161,8 @@ int main(int argc, char** argv) {
             strcpy(new_item->title, x_value); 
             strcpy(new_item->username, y_value); 
             strcpy(new_item->password, z_value);
-            ecall_status = ecall_add_item(eid, &ret, p_value, new_item, sizeof(item_t));
-            if (ecall_status != SGX_SUCCESS || is_error(ret)) {
+            ret_status = add_item(p_value, new_item, sizeof(item_t));
+            if (ret_status != RET_SUCCESS) {
                 error_print("Fail to add new item to wallet.");
             }
             else {
@@ -280,8 +179,8 @@ int main(int argc, char** argv) {
                 error_print("Option -r requires an integer argument.");
             }
             else {
-                ecall_status = ecall_remove_item(eid, &ret, p_value, index);
-                if (ecall_status != SGX_SUCCESS || is_error(ret)) {
+                ret_status = remove_item(p_value, index);
+                if (ret_status != RET_SUCCESS) {
                     error_print("Fail to remove item.");
                 }
                 else {
@@ -296,18 +195,6 @@ int main(int argc, char** argv) {
             show_help();
         }
     }
-    
-
-
-    ////////////////////////////////////////////////
-    // destroy enclave
-    ////////////////////////////////////////////////
-    enclave_status = sgx_destroy_enclave(eid);
-    if(enclave_status != SGX_SUCCESS) {
-        error_print("Fail to destroy enclave."); 
-        return -1;
-    }
-    info_print("Enclave successfully destroyed.");
 
 
     ////////////////////////////////////////////////

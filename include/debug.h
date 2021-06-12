@@ -22,10 +22,10 @@
 
 
 // uncomment to enable debug print
-//#define ENCLAVE_DEBUG
+//#define DEBUG
 
-#ifdef ENCLAVE_DEBUG
-	#define DEBUG_PRINT(str) ocall_debug_print(str)
+#ifdef DEBUG
+	#define DEBUG_PRINT(str) debug_print(str)
 #else
 	#define DEBUG_PRINT(str)
 #endif

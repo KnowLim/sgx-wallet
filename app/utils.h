@@ -19,8 +19,18 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
-#include "wallet.h"
+#include "../wallet/wallet.h"
 
+
+/***************************************************
+ * Defines
+ ***************************************************/
+#define APP_NAME "wallet"
+
+
+/***************************************************
+ * Functions
+ ***************************************************/
 
 /**
  * @brief      Prints an info message. 
@@ -81,16 +91,6 @@ int is_error(int error_code);
  * @return     -
  */
 void show_help();
-
-
-/**
- * @brief      Prints the build version. 
- *
- * @param      -
- *
- * @return     -
- */
-void show_version();
 
 
 #endif // UTIL_H_

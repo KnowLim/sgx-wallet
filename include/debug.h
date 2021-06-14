@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with SGX-WALLET.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #ifndef DEBUG_H_
 #define DEBUG_H_
 
